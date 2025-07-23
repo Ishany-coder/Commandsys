@@ -17,7 +17,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.Robot.Robot;
 import org.firstinspires.ftc.teamcode.Subsys.utils.GoBildaPinpoint;
 import org.firstinspires.ftc.teamcode.Subsys.utils.Point;
-import org.firstinspires.ftc.teamcode.Subsys.utils.SQuiDcontroller;
+import org.firstinspires.ftc.teamcode.Subsys.utils.Controllers.SquID.SquIDController;
 
 import java.util.List;
 
@@ -27,8 +27,8 @@ public class Drive extends Wsubsystem{
     private final double RADIUS_THRESHOLD_INCHES = 3;
     private Vector2d errorVector = new Vector2d();
     private double headingErrorRad;
-    private SQuiDcontroller headingContoller = new SQuiDcontroller(0.0);
-    private SQuiDcontroller translationalController = new SQuiDcontroller(0.0);
+    private SquIDController headingContoller = new SquIDController();
+    private SquIDController translationalController = new SquIDController();
 
     private Point targetPoint = new Point();
     private final DcMotorEx RFmotor, RBmotor, LFmotor, LBmotor;
@@ -93,18 +93,18 @@ public class Drive extends Wsubsystem{
         errorVector = errorVector.rotateBy(-Math.toDegrees(RobotHeadingRad));
 
         //caclulate powers
-        turn = -headingContoller.calculate(headingErrorRad);
-        drive = translationalController.calculate(errorVector.getX());
-        strafe = translationalController.calculate(errorVector.getY());
+        turn = -headingContoller.calculate(RobotHeadingRad, Math.toRadians(targetPoint.getHeading()));
+        drive = translationalController.calculateError(errorVector.getX());
+        strafe = translationalController.calculateError(errorVector.getY());
     }
     public void tuneHeading(double kSQ){
-        headingContoller.setkSQ(kSQ);
+        headingContoller.setPID(kSQ);
         telemetry.addData("Position", RobotHeadingRad);
         telemetry.addData("Target", targetPoint.getHeading());
         telemetry.addData("Error", AngleUnit.normalizeRadians(Math.toRadians(targetPoint.getHeading()) - RobotHeadingRad));
     }
     public void tuneTranslational(double kSQ){
-        translationalController.setkSQ(kSQ);
+        translationalController.setPID(kSQ);
         telemetry.addData("Position", errorVector.magnitude());
         telemetry.addData("Target", 0.0);
         telemetry.addData("Error", AngleUnit.normalizeRadians(Math.toRadians(targetPoint.getHeading()) - RobotHeadingRad));

@@ -7,11 +7,13 @@ import com.arcrobotics.ftclib.geometry.Transform2d;
 import com.arcrobotics.ftclib.geometry.Translation2d;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.Robot.RobotConstants;
+import org.firstinspires.ftc.teamcode.Robot.RobotConstants.*;
+
 @Config
 public class DrivetrainSquIDController {
     // Tuning parameter to adjust how loop time affects velocity-based distance calculation
-    public static double looptimeAdjuster = 15;
-
+    private static final RobotConstants robotConstants = new RobotConstants();
     private final ElapsedTime loopTime;  // Timer to track loop iteration duration
     private final  SquIDController squid; // Custom PID controller for movement adjustments
 
@@ -81,7 +83,7 @@ public class DrivetrainSquIDController {
      * @return The estimated travel distance
      */
     private static double getDistanceFromVelocity(double velocity) {
-        velocity *= looptimeAdjuster;  // Adjust velocity based on tuning constant
+        velocity *= RobotConstants.LoopTimeAdjuster;  // Adjust velocity based on tuning constant
         // Quadratic regression equation to approximate travel distance
         return 0.00286 * velocity * velocity + 0.304 * velocity - 0.837;
     }

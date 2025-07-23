@@ -6,6 +6,8 @@ import com.arcrobotics.ftclib.geometry.Pose2d;
 import com.arcrobotics.ftclib.geometry.Rotation2d;
 import com.arcrobotics.ftclib.geometry.Translation2d;
 
+import org.firstinspires.ftc.teamcode.Robot.Robot;
+import org.firstinspires.ftc.teamcode.Robot.RobotConstants;
 import org.firstinspires.ftc.teamcode.Subsys.Drive;
 import org.firstinspires.ftc.teamcode.Subsys.utils.Controllers.FeedForward.FeedforwardController;
 import org.firstinspires.ftc.teamcode.Subsys.utils.Controllers.PurePursuit.PurePursuitController;
@@ -17,22 +19,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CubicSpline extends Spline{
+    private final RobotConstants robotConstants = new RobotConstants();
     private final GoBildaPinpoint odo;
     private final DrivetrainSquIDController squid;
     private final Drive drive;
-    private double KV = 0.1;
-    private double KA = 0.1;
     public CubicSpline(GoBildaPinpoint odo, DrivetrainSquIDController squid, Drive drive){
         this.odo = odo;
         this.squid = squid;
         this.drive = drive;
     }
     @Override
-    public List<Point> generateSpline(Pose2d startPose, List<Translation2d> interiorPoints, Pose2d endPose){
+    public List<Pose2d> generateSpline(Pose2d startPose, List<Pose2d> interiorPoints, Pose2d endPose){
         // Combine all points: start, interior, end
         List<Translation2d> points = new ArrayList<>();
         points.add(startPose.getTranslation());
-        points.addAll(interiorPoints);
+        for(Pose2d pose : interiorPoints){
+            points.add(pose.getTranslation());
+        }
         points.add(endPose.getTranslation());
         int numSamples = interiorPoints.size();
 
@@ -52,7 +55,7 @@ public class CubicSpline extends Spline{
         double[] xSecondDerivatives = computeSecondDerivatives(t, xValues);
         double[] ySecondDerivatives = computeSecondDerivatives(t, yValues);
 
-        List<Point> path = new ArrayList<>();
+        List<Pose2d> path = new ArrayList<>();
 
         for (int sample = 0; sample <= numSamples; sample++) {
             double tSample = (pointCount - 1) * sample / (double)numSamples;
@@ -84,7 +87,7 @@ public class CubicSpline extends Spline{
 
             double heading = Math.atan2(dy, dx);
 
-            path.add(new Point(xPos, yPos, Math.toDegrees(heading)));
+            path.add(new Pose2d(xPos, yPos, new Rotation2d(Math.toDegrees(heading))));
         }
         return path;
     }
@@ -139,7 +142,7 @@ public class CubicSpline extends Spline{
 
         Pose2d prevPose = path.get(0);
         long prevTime = System.currentTimeMillis();
-        FeedforwardController ff = new FeedforwardController(KV, KA);
+        FeedforwardController ff = new FeedforwardController(robotConstants.FeedForwardKV, robotConstants.FeedForwardKA);
         Log.i("MOVING ROBOT", "INITIALIZED");
 
         double currentVel = 0;
@@ -188,7 +191,7 @@ public class CubicSpline extends Spline{
             }
 
             // Get lookahead point
-            PurePursuitController controller = new PurePursuitController(6);
+            PurePursuitController controller = new PurePursuitController(robotConstants.PurePursuitLookahead);
             Pose2d lookahead = controller.getLookaheadPoint(path, currentPose);
             Log.i("LOOKAHEAD POINT", "X: " + lookahead.getX() + " Y: " + lookahead.getY());
 

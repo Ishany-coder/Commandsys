@@ -9,13 +9,14 @@ import com.arcrobotics.ftclib.command.RunCommand;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
+import org.firstinspires.ftc.teamcode.Robot.RobotConstants;
 import org.firstinspires.ftc.teamcode.Subsys.Drive;
 import org.firstinspires.ftc.teamcode.Subsys.utils.GoBildaPinpoint;
 import org.firstinspires.ftc.teamcode.Subsys.utils.Point;
 @TeleOp
 @Config
 public class TranslationalTuner extends CommandOpMode {
-    public static double SQT;
+    private final RobotConstants robotConstants = new RobotConstants();
     private Drive drive;
     @Override
     public void initialize() {
@@ -48,7 +49,7 @@ public class TranslationalTuner extends CommandOpMode {
             drive.setTarget(new Point(24, 24, 180));
             drive.DriveToTarget();
         }
-        drive.tuneHeading(SQT);
+        drive.tuneTranslational(robotConstants.SQT);
         super.run();
     }
 }
